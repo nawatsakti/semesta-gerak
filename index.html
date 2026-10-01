@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#03050d" />
+  <title>Semesta Gerak — Interactive Gesture Experience</title>
+  <meta name="description" content="Semesta partikel interaktif yang dikendalikan dengan gerakan tangan." />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main id="app">
+    <canvas id="universe" aria-label="Semesta partikel interaktif"></canvas>
+    <div class="noise"></div>
+    <div class="vignette"></div>
+
+    <section class="hero" id="hero">
+      <div class="hero-orbit orbit-a"></div>
+      <div class="hero-orbit orbit-b"></div>
+      <div class="hero-core"></div>
+      <div class="eyebrow">INTERACTIVE GESTURE EXPERIENCE</div>
+      <h1>SEMESTA <span>GERAK</span></h1>
+      <p>Gerakkan tanganmu. Bentuk semestamu.</p>
+      <button id="startBtn" class="primary"><span>Mulai Pengalaman</span><i>→</i></button>
+      <div class="sub">WEBCAM • HAND TRACKING • REAL-TIME PARTICLES</div>
+    </section>
+
+    <section class="hud hidden" id="hud">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <strong>SEMESTA GERAK</strong>
+          <span>GESTURE UNIVERSE</span>
+        </div>
+      </div>
+
+      <div class="status-card">
+        <span class="dot" id="statusDot"></span>
+        <div class="status-copy">
+          <small>GESTURE TERDETEKSI</small>
+          <strong id="gestureText">MENCARI TANGAN...</strong>
+        </div>
+        <div class="signal"><i></i><i></i><i></i></div>
+      </div>
+
+      <div class="mode-card">
+        <small>MODE VISUAL</small>
+        <strong id="modeText">NEBULA GALAXY</strong>
+      </div>
+
+      <div class="hint" id="hint">✋ Buka telapak tangan di depan kamera</div>
+
+      <div class="actions">
+        <button id="nameBtn" class="name-action" title="Bentuk nama dari partikel">✦ Nama</button>
+        <button id="shapeBtn" class="shape-action" title="Morph ke bentuk preset">⬡ Bentuk</button>
+        <button id="captureBtn" class="capture-action" title="Simpan hasil ke gambar">📸 Abadikan</button>
+        <button id="cameraBtn" title="Tampilkan/sembunyikan kamera">Kamera</button>
+        <button id="fullscreenBtn" title="Layar penuh">Fullscreen</button>
+        <button id="resetBtn" title="Reset semesta">Reset</button>
+      </div>
+    </section>
+
+    <aside class="camera-wrap hidden" id="cameraWrap">
+      <video id="camera" autoplay playsinline muted></video>
+      <canvas id="cameraOverlay"></canvas>
+      <div class="camera-shade"></div>
+      <div class="camera-topline"><span class="live-dot"></span> LIVE TRACKING</div>
+      <div class="camera-label">MEDIAPIPE • 21 LANDMARKS</div>
+    </aside>
+
+    <section class="legend hidden" id="legend">
+      <div data-gesture="open"><span>✋</span><b>Telapak</b><small>Tarik bintang</small></div>
+      <div data-gesture="pinch"><span>🤏</span><b>Cubit</b><small>Buat vortex</small></div>
+      <div data-gesture="fist"><span>✊</span><b>Kepal</b><small>Supernova</small></div>
+      <div data-gesture="two"><span>👐</span><b>2 tangan</b><small>Logo reveal</small></div>
+    </section>
+
+    <div class="energy hidden" id="energy">
+      <div class="energy-label"><span>ENERGY</span><b id="energyValue">0%</b></div>
+      <div class="energy-track"><i id="energyFill"></i></div>
+    </div>
+
+    <div class="loading hidden" id="loading">
+      <div class="loader-orbit"><i></i><i></i><i></i></div>
+      <p>Menyiapkan hand tracking...</p>
+      <small>Izinkan akses kamera saat browser meminta izin.</small>
+    </div>
+
+    <section class="name-panel hidden" id="namePanel" aria-modal="true" role="dialog" aria-labelledby="nameTitle">
+      <div class="name-dialog">
+        <div class="name-kicker">CONSTELLATION MODE</div>
+        <h2 id="nameTitle">Bentuk namamu dari bintang.</h2>
+        <p>Ketik nama, lalu ribuan partikel akan menyusunnya di tengah semesta.</p>
+        <form id="nameForm" autocomplete="off">
+          <input id="nameInput" maxlength="16" placeholder="Contoh: IZHAR" aria-label="Nama" />
+          <button type="submit">Bentuk Nama <span>→</span></button>
+        </form>
+        <div class="name-help">Setelah terbentuk: ✋ tarik bintang · 🤏 vortex · ✊ ledakkan · 👐 perbesar</div>
+        <button id="nameCancel" class="name-close" type="button" aria-label="Tutup">×</button>
+      </div>
+    </section>
+
+    <section class="shape-panel hidden" id="shapePanel" aria-modal="true" role="dialog" aria-labelledby="shapeTitle">
+      <div class="shape-dialog">
+        <div class="name-kicker">SHAPE MORPH</div>
+        <h2 id="shapeTitle">Pilih bentuk semestamu.</h2>
+        <p>Ketik teks atau emoji, upload logo, gambar sendiri, atau pilih salah satu bentuk cepat di bawah.</p>
+
+        <div class="custom-shape">
+          <form id="customShapeForm" class="custom-shape-form" autocomplete="off">
+            <input id="customShapeInput" maxlength="24" placeholder="Contoh: 🚀, LOVE, 2026, INFORMATIKA..." aria-label="Teks atau emoji bebas" />
+            <button type="submit">Bentuk ✦</button>
+          </form>
+
+          <div class="custom-actions">
+            <button type="button" id="uploadShapeBtn">🖼 Upload gambar / logo</button>
+            <button type="button" id="drawShapeBtn">✍ Gambar sendiri</button>
+            <input type="file" id="shapeFileInput" accept="image/png,image/jpeg,image/webp" hidden />
+          </div>
+
+          <div class="draw-zone hidden" id="drawZone">
+            <div class="draw-title">
+              <span>Gambar bentukmu di sini</span>
+              <small>Gunakan mouse atau jari</small>
+            </div>
+            <canvas id="drawCanvas" width="720" height="360"></canvas>
+            <div class="draw-actions">
+              <button type="button" id="clearDrawBtn">Bersihkan</button>
+              <button type="button" id="cancelDrawBtn">Batal</button>
+              <button type="button" id="useDrawBtn" class="use-draw">Jadikan Semesta ✦</button>
+            </div>
+          </div>
+
+          <div class="preset-title">PRESET CEPAT</div>
+        </div>
+
+        <div class="shape-grid" id="shapeGrid">
+          <button type="button" data-shape="heart">❤️<span>Hati</span></button>
+          <button type="button" data-shape="butterfly">🦋<span>Kupu-kupu</span></button>
+          <button type="button" data-shape="dna">🧬<span>DNA</span></button>
+          <button type="button" data-shape="code">{ }</button>
+          <button type="button" data-shape="logo">IF<span>Logo Info</span></button>
+        </div>
+        <div class="name-help">Tips: tahan 2 tangan ±2 detik untuk memunculkan Logo Informatika otomatis.</div>
+        <button id="shapeClose" class="name-close" type="button" aria-label="Tutup">×</button>
+      </div>
+    </section>
+
+    <div class="name-badge hidden" id="nameBadge"><small id="nameBadgeKicker">CONSTELLATION</small><strong id="nameBadgeText"></strong></div>
+    <div class="idle-badge hidden" id="idleBadge">🎬 ATTRACTION MODE</div>
+    <div class="hold-ring hidden" id="holdRing"><span id="holdProgress"></span></div>
+    <div class="flash" id="flash"></div>
+    <div class="toast" id="toast"></div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
